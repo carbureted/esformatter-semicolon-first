@@ -90,10 +90,41 @@ function findOpening(token) {
   }
 }
 
+function shouldKeepLookingForArrow(token) {
+  if (token.type === 'Identifier') {
+    return true
+  }
+  else if (token.value === ',') {
+    return true
+  }
+  else if (token.value === ')') {
+    return true
+  }
+  else if (token.type === 'WhiteSpace') {
+    return true
+  }
+  else {
+    return false
+  }
+}
+
+function lookAheadForArrow(token) {
+  var nextToken = token.next
+
+  if (shouldKeepLookingForArrow(nextToken)) {
+    return lookAheadForArrow(nextToken)
+  }
+  else {
+    return token.next.value === '=>'
+  }
+}
+
 function shouldInsert(opening) {
   if (!opening) return;
 
   var prev = tk.findPrev(opening, tk.isCode);
-  return !prev || prev.type !== 'Punctuator' || prev.value === ')';
+  var isArrowFunction = opening.value === '(' && lookAheadForArrow(opening)
+
+  return (!prev || prev.type !== 'Punctuator' || prev.value === ')') && !isArrowFunction;
 }
 
